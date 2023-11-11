@@ -13,31 +13,20 @@ def train_test_split(data: pd.DataFrame, n_periods_split: int = 5, group_columns
 
     data_grouped = data.groupby(group_columns).agg(list)
 
-    def __train_test_split(periods):
+    def _train_test_split(periods):
         if len(periods) >= n_periods_split:
             return [False] * (len(periods) - 2) + [True] * 2
         else:
             return [False] * len(periods)
 
-    data_grouped["is_test"] = data_grouped["period"].apply(__train_test_split)
+    data_grouped["is_test"] = data_grouped["period"].apply(_train_test_split)
     explode_columns = data_grouped.columns.tolist()
     train_test = data_grouped.explode(explode_columns).reset_index()
 
     return train_test
 
 
-def get_normal_weight(df, threshold=100):
-    cur_df = df.copy()
-    solo_wagons = cur_df[cur_df['real_wagon_count'] == 1][['rps', 'podrod', 'real_weight', 'real_wagon_count']]
-    solo_wagons = solo_wagons[solo_wagons['real_weight'] < threshold]
-    weight_dict = solo_wagons.groupby(['rps', 'podrod'])['real_weight'].agg(
-        [('mean_weight', 'mean'), ('q95_weight', lambda x: np.quantile(a=x, q=0.95))]).reset_index()
-    cur_df = cur_df.loc[solo_wagons.index]
-    cur_df = cur_df.merge(weight_dict, how='left', on=['rps', 'podrod'])
-    return cur_df, weight_dict
-
-
-def add_time_series_features(df, data_cols: str = None):
+def add_time_series_features(df: pd.DataFrame, data_cols: str = None):
     if data_cols is None:
         data_cols = ["period"]
     features = []
@@ -53,10 +42,10 @@ def add_time_series_features(df, data_cols: str = None):
     return df, features
 
 
-def add_master_data_mappings(df: pd.DataFrame) -> pd.DataFrame:
-    client_mapping_file = "./data/client_mapping.csv"
-    freight_mapping_file = "./data/freight_mapping.csv"
-    station_mapping_file = "./data/station_mapping.csv"
+def add_master_data_mappings(df: pd.DataFrame, 
+                             client_mapping_file: str = './data/client_mapping.csv', 
+                             freight_mapping_file: str = './data/freight_mapping.csv', 
+                             station_mapping_file: str = './data/station_mapping.csv') -> pd.DataFrame:
     client_mapping = pd.read_csv(
         client_mapping_file,
         sep=";",
