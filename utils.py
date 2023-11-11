@@ -1,4 +1,8 @@
 import pandas as pd
+import numpy as np
+
+import datetime
+
 from typing import List
 
 
@@ -31,9 +35,11 @@ def get_normal_weight(df, threshold=100):
     return cur_df, weight_dict
 
 
-def add_time_series_features(df, data_cols=['period']):
+def add_time_series_features(df, data_cols: None = str):
+    if data_cols is None:
+        data_cols = ["period"]
     features = []
-    for col in datetime_columns:
+    for col in data_cols:
         features.extend([col + "_year", col + "_day", col + "_weekday", col + "_month"])
         df[col] = df[col].fillna(df[col].mode())
         df[col] = pd.to_datetime(df[col], format="%Y-%m-%d",errors='coerce')
