@@ -1,2 +1,6 @@
 jupyter
 pandas
+numpy
+scikit-learn
+tqdm
+catboost
