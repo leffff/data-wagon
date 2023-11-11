@@ -107,8 +107,8 @@ def evaluate(fact: pd.DataFrame, forecast: pd.DataFrame, public: bool = True) ->
 
     # = Собственно расчет метрик =
     # 1. Добавляем сущности верхних уровней гранулярности по справочникам
-    fact = add_master_data_mappings(fact)
-    forecast = add_master_data_mappings(forecast)
+    # fact = add_master_data_mappings(fact)
+    # forecast = add_master_data_mappings(forecast)
 
     # 2. Расчет KPI
     compare_data = pd.merge(
@@ -137,47 +137,3 @@ def evaluate(fact: pd.DataFrame, forecast: pd.DataFrame, public: bool = True) ->
     ).sum()
 
     return score
-
-
-def add_master_data_mappings(df: pd.DataFrame) -> pd.DataFrame:
-    # = Пути к справочникам - откорректировать если в реальной системе будут лежать по другому адресу =
-    client_mapping_file = "./data/client_mapping.csv"
-    freight_mapping_file = "./data/freight_mapping.csv"
-    station_mapping_file = "./data/station_mapping.csv"
-
-    # Клиент - холдинг
-    client_mapping = pd.read_csv(
-        client_mapping_file,
-        sep=";",
-        decimal=",",
-        encoding="windows-1251",
-    )
-    df = pd.merge(df, client_mapping, how="left", on="client_sap_id")
-
-    # Груз
-    freight_mapping = pd.read_csv(
-        freight_mapping_file, sep=";", decimal=",", encoding="windows-1251"
-    )
-    df = pd.merge(df, freight_mapping, how="left", on="freight_id")
-
-    # Станции
-    station_mapping = pd.read_csv(
-        station_mapping_file,
-        sep=";",
-        decimal=",",
-        encoding="windows-1251",
-    )
-    df = pd.merge(
-        df,
-        station_mapping.add_prefix("sender_"),
-        how="left",
-        on="sender_station_id",
-    )
-    df = pd.merge(
-        df,
-        station_mapping.add_prefix("recipient_"),
-        how="left",
-        on="recipient_station_id",
-    )
-
-    return df
