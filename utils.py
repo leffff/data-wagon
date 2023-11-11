@@ -35,7 +35,7 @@ def get_normal_weight(df, threshold=100):
     return cur_df, weight_dict
 
 
-def add_time_series_features(df, data_cols: None = str):
+def add_time_series_features(df, data_cols: str = None):
     if data_cols is None:
         data_cols = ["period"]
     features = []
